@@ -1,4 +1,4 @@
-pragma solidity ^0.4.25
+pragma solidity ^0.5.0;
 
 contract auction {
 	// static
@@ -12,10 +12,10 @@ contract auction {
 	mapping(address => uint256) public fundsByBidder;
 	uint public highestBid;
 
-	constructor Auction(address _owner, uint _startBlock, uint _endBlock, string _itemLink) {
-	    if (_startBlock >= _endBlock) throw;
-	    if (_startBlock < block.number) throw;
-	    if (_owner == 0) throw;
+	function Auction(address _owner, uint _startBlock, uint _endBlock, string memory _itemLink) public {
+	    assert(_startBlock >= _endBlock);
+	    assert(_startBlock < block.number);
+	    //assert(_owner == 0);
 
 	    owner = _owner;
 	    startBlock = _startBlock;
@@ -23,34 +23,34 @@ contract auction {
 	    itemLink = _itemLink;
 	}
 
-	function payable notOwner notHighestBidder notZero bidOnline notDouble notHighestBid placeBid() {
+	function placeBid() public notOwner notHighestBidder notZero bidOnline notDouble notHighestBid payable{
 		highestBid = fundsByBidder[msg.sender] + msg.value;
-		fundsByBidder[msg.sender] = highestBid
+		fundsByBidder[msg.sender] = highestBid;
 
 	}
 
 	modifier notOwner {
-		if (msg.sender == owner) throw;
+		assert(msg.sender == owner) ;
 		_;
 	}
 	modifier notHighestBidder {
-		if (msg.sender == highestBidder) throw;
+		assert(msg.sender == highestBidder);
 		_;
 	}
 	modifier notZero {
-		if (msg.value == 0) throw;
+		assert(msg.value == 0);
 		_;
 	}
 	modifier bidOnline {
-		if (block.number < startBlock || block.number > endBlock) throw;
+		assert(block.number < startBlock || block.number > endBlock);
 		_;
 	}
 	modifier notDouble {
-		if (fundsByBidder[msg.sender] + msg.value == 2 * highestBid) throw;
+		assert(fundsByBidder[msg.sender] + msg.value == 2 * highestBid);
 		_;
 	}
 	modifier notHighestBid {
-		if (fundsByBidder[msg.sender] + msg.value <= highestBid) throw;
+		assert(fundsByBidder[msg.sender] + msg.value <= highestBid);
 		_;
 	}
 
